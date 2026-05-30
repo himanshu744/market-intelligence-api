@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genpact Agentic AI Market Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#1a1a1a;font-size:14px}
+  .topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100}
+  .topbar-left h1{font-size:16px;font-weight:600;color:#111}
+  .topbar-left p{font-size:11px;color:#6b7280;margin-top:2px}
+  .page{max-width:1200px;margin:0 auto;padding:20px 24px}
+  .tab-row{display:flex;gap:4px;border-bottom:1px solid #e5e7eb;margin-bottom:20px}
+  .tab{font-size:13px;padding:8px 16px;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+  .tab.active{color:#2563eb;border-bottom:2px solid #2563eb}
+  .section{display:none}.section.active{display:block}
+  .filter-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;background:#fff;padding:16px;border-radius:10px;border:1px solid #e5e7eb}
+  .fg label{font-size:11px;color:#6b7280;display:block;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+  select{width:100%;font-size:13px;padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#111;cursor:pointer}
+  select:focus{outline:none;border-color:#2563eb}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+  .mc{background:#fff;border-radius:8px;padding:14px;border:1px solid #e5e7eb}
+  .mc .lbl{font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:500}
+  .mc .val{font-size:22px;font-weight:600;color:#111}
+  .mc .sub{font-size:11px;color:#16a34a;margin-top:2px}
+  .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .chart-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb}
+  .chart-card h3{font-size:12px;font-weight:600;color:#6b7280;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+  .chart-card-full{background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;margin-bottom:20px}
+  .chart-card-full h3{font-size:12px;font-weight:600;color:#6b7280;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+  .table-wrap{background:#fff;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+  thead{background:#f9fafb}
+  th{padding:10px 12px;text-align:left;font-weight:600;color:#6b7280;font-size:11px;border-bottom:1px solid #e5e7eb;text-transform:uppercase;letter-spacing:.03em}
+  td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#111;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#f9fafb}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600}
+  .b-high{background:#dcfce7;color:#15803d}
+  .b-med{background:#fef3c7;color:#92400e}
+  .b-low{background:#fee2e2;color:#b91c1c}
+  .b-strong{background:#d1fae5;color:#065f46}
+  .b-growing{background:#dbeafe;color:#1e40af}
+  .b-emerging{background:#fef3c7;color:#92400e}
+  .b-weak{background:#fee2e2;color:#b91c1c}
+  .btn{font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer;border:1px solid #d1d5db;background:#fff;color:#111;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:#f9fafb}
+  .btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}
+  .btn-primary:hover{background:#1d4ed8}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .macro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+  .macro-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb}
+  .macro-card .mlbl{font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:500}
+  .macro-card .mval{font-size:24px;font-weight:700;color:#111}
+  .macro-card .msub{font-size:11px;color:#16a34a;margin-top:3px}
+  .macro-card .msrc{font-size:10px;color:#9ca3af;margin-top:6px}
+  .region-table{width:100%;border-collapse:collapse;font-size:12px}
+  .region-table td,.region-table th{padding:10px 12px;border-bottom:1px solid #f3f4f6;text-align:left}
+  .region-table th{font-size:11px;color:#6b7280;font-weight:600;background:#f9fafb;text-transform:uppercase;letter-spacing:.03em}
+  .bar-bg{background:#e5e7eb;border-radius:4px;height:6px;margin-top:5px;width:100%}
+  .bar-fill{height:6px;border-radius:4px;background:#2563eb}
+  .col-check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:16px}
+  .col-check{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 12px;border-radius:7px;border:1px solid #e5e7eb;background:#fff}
+  .col-check:hover{background:#f9fafb}
+  .col-check input{cursor:pointer;accent-color:#2563eb}
+  .info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;font-size:13px;color:#1e40af;line-height:1.8}
+  .info-box strong{color:#1e3a8a}
+  .row-count{font-size:11px;color:#9ca3af;padding:8px 12px}
+  @media(max-width:640px){.chart-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>Genpact · Agentic AI Market Intelligence</h1>
+    <p>Real data · Straits Research · Grand View Research · MarketsandMarkets · Mordor Intelligence · Fortune Business Insights · 2024–2025</p>
+  </div>
+  <button class="btn btn-primary" onclick="exportCSV()">&#8595; Export CSV for Tableau</button>
+</div>
+
+<div class="page">
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('market',this)">Market data</button>
+    <button class="tab" onclick="switchTab('macro',this)">Global macro</button>
+    <button class="tab" onclick="switchTab('export',this)">CSV columns</button>
+  </div>
+
+  <!-- MARKET DATA -->
+  <div id="tab-market" class="section active">
+    <div class="filter-bar">
+      <div class="fg"><label>Vertical</label>
+        <select id="f-v" onchange="applyFilters()">
+          <option value="">All verticals</option>
+          <option>BFSI</option><option>Healthcare</option><option>Manufacturing</option>
+          <option>Retail & CPG</option><option>Technology</option><option>Energy & Utilities</option>
+        </select>
+      </div>
+      <div class="fg"><label>Capability</label>
+        <select id="f-c" onchange="applyFilters()">
+          <option value="">All capabilities</option>
+          <option value="Fraud">Fraud Detection</option>
+          <option value="Autonomous">Autonomous Process</option>
+          <option value="Intelligent">Intelligent Virtual Assistants</option>
+          <option value="Multi-Agent">Multi-Agent Systems</option>
+        </select>
+      </div>
+      <div class="fg"><label>Service line</label>
+        <select id="f-s" onchange="applyFilters()">
+          <option value="">All service lines</option>
+          <option value="Risk">Risk & Compliance</option>
+          <option value="Customer">Customer Experience</option>
+          <option value="Finance">Finance & Accounting</option>
+          <option value="Supply">Supply Chain & Ops</option>
+          <option value="Healthcare">Healthcare Operations</option>
+          <option value="AI-Powered">AI-Powered Software</option>
+          <option value="Operations">Operations & Asset</option>
+        </select>
+      </div>
+      <div class="fg"><label>Region</label>
+        <select id="f-r" onchange="applyFilters()">
+          <option value="">All regions</option>
+          <option>North America</option><option>Europe</option>
+          <option>Asia Pacific</option><option>Middle East</option>
+        </select>
+      </div>
+      <div class="fg"><label>Adoption level</label>
+        <select id="f-a" onchange="applyFilters()">
+          <option value="">All levels</option>
+          <option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <div class="fg"><label>Genpact presence</label>
+        <select id="f-p" onchange="applyFilters()">
+          <option value="">All</option>
+          <option>Strong</option><option>Growing</option><option>Emerging</option><option>Weak</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="metrics" id="metrics-row"></div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Market size by vertical ($B)</h3>
+        <div style="position:relative;height:220px"><canvas id="chart-vertical" role="img" aria-label="Market size by vertical"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Avg CAGR by region (%)</h3>
+        <div style="position:relative;height:220px"><canvas id="chart-region" role="img" aria-label="Average CAGR by region"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card-full">
+      <h3>Genpact presence vs market adoption — bubble size = market size</h3>
+      <div style="position:relative;height:240px"><canvas id="chart-presence" role="img" aria-label="Bubble chart of Genpact presence vs market adoption"></canvas></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:12%">Vertical</th>
+          <th style="width:14%">Capability</th>
+          <th style="width:15%">Service line</th>
+          <th style="width:11%">Region</th>
+          <th style="width:9%">Market ($B)</th>
+          <th style="width:7%">CAGR</th>
+          <th style="width:9%">Adoption</th>
+          <th style="width:13%">Top competitors</th>
+          <th style="width:10%">Genpact</th>
+        </tr></thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+      <p class="row-count" id="row-count"></p>
+    </div>
+  </div>
+
+  <!-- GLOBAL MACRO -->
+  <div id="tab-macro" class="section">
+    <div class="macro-grid">
+      <div class="macro-card"><div class="mlbl">Global market 2024</div><div class="mval">$5.78B</div><div class="msub">Base year value</div><div class="msrc">Straits Research 2025</div></div>
+      <div class="macro-card"><div class="mlbl">Global market 2025</div><div class="mval">$8.31B</div><div class="msub">+44% year on year</div><div class="msrc">Straits Research 2025</div></div>
+      <div class="macro-card"><div class="mlbl">Projected 2033</div><div class="mval">$154B</div><div class="msub">10-year outlook</div><div class="msrc">Straits Research 2025</div></div>
+      <div class="macro-card"><div class="mlbl">CAGR 2025–2033</div><div class="mval">44.2%</div><div class="msub">Fastest enterprise tech segment</div><div class="msrc">Multiple analysts</div></div>
+      <div class="macro-card"><div class="mlbl">Enterprise CAGR</div><div class="mval">46.2%</div><div class="msub">$2.6B → $24.5B by 2030</div><div class="msrc">Grand View Research 2025</div></div>
+      <div class="macro-card"><div class="mlbl">Org adoption 2025</div><div class="mval">79%</div><div class="msub">Have some level of adoption</div><div class="msrc">Precedence Research 2025</div></div>
+      <div class="macro-card"><div class="mlbl">Average ROI</div><div class="mval">171%</div><div class="msub">3x vs traditional automation</div><div class="msrc">Landbase 2026</div></div>
+      <div class="macro-card"><div class="mlbl">North America share</div><div class="mval">40%</div><div class="msub">Largest region 2024</div><div class="msrc">Straits Research 2025</div></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Regional market share 2024</h3>
+        <div style="position:relative;height:220px"><canvas id="chart-macro-region" role="img" aria-label="Regional market share pie chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Vertical market share 2024</h3>
+        <div style="position:relative;height:220px"><canvas id="chart-macro-vertical" role="img" aria-label="Vertical market share pie chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card-full">
+      <h3>Regional breakdown — market size, share & growth</h3>
+      <table class="region-table">
+        <thead><tr><th>Region</th><th>Share 2024</th><th>Market size</th><th>CAGR</th><th>Growth indicator</th><th>Outlook</th></tr></thead>
+        <tbody>
+          <tr><td><strong>North America</strong></td><td>40%</td><td>$2.31B</td><td>44.1%</td><td><div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div></td><td style="color:#6b7280;font-size:11px">Dominant — largest market, strong R&D</td></tr>
+          <tr><td><strong>Europe</strong></td><td>25%</td><td>$1.45B</td><td>41.0%</td><td><div class="bar-bg"><div class="bar-fill" style="width:79%"></div></div></td><td style="color:#6b7280;font-size:11px">Mature — GDPR compliance driven adoption</td></tr>
+          <tr><td><strong>Asia Pacific</strong></td><td>22%</td><td>$1.27B</td><td>48.0%</td><td><div class="bar-bg"><div class="bar-fill" style="width:92%;background:#16a34a"></div></div></td><td style="color:#6b7280;font-size:11px">Fastest growing — BFSI & manufacturing leading</td></tr>
+          <tr><td><strong>Middle East</strong></td><td>7%</td><td>$0.40B</td><td>52.0%</td><td><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div></td><td style="color:#6b7280;font-size:11px">Emerging — Vision 2030 programs driving spend</td></tr>
+          <tr><td><strong>Rest of World</strong></td><td>6%</td><td>$0.35B</td><td>38.0%</td><td><div class="bar-bg"><div class="bar-fill" style="width:73%"></div></div></td><td style="color:#6b7280;font-size:11px">Nascent — early stage adoption</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-card-full">
+      <h3>Capability breakdown — market share & growth</h3>
+      <table class="region-table">
+        <thead><tr><th>Capability</th><th>Market share 2024</th><th>CAGR</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Multi-Agent Systems</strong></td><td>53%</td><td>43.5%</td><td style="color:#6b7280;font-size:11px">Dominant architecture — 53% of all deployments</td></tr>
+          <tr><td><strong>Intelligent Virtual Assistants & Co-pilots</strong></td><td>34%</td><td>44.2%</td><td style="color:#6b7280;font-size:11px">Largest segment by revenue share</td></tr>
+          <tr><td><strong>Autonomous Process Automation</strong></td><td>23%</td><td>44.6%</td><td style="color:#6b7280;font-size:11px">Fastest growing horizontal use case</td></tr>
+          <tr><td><strong>Fraud Detection & Compliance Agents</strong></td><td>15%</td><td>45.0%</td><td style="color:#6b7280;font-size:11px">BFSI-led, high regulatory pull</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-card-full">
+      <h3>Vertical market share & CAGR</h3>
+      <table class="region-table">
+        <thead><tr><th>Vertical</th><th>Market share 2024</th><th>CAGR</th><th>Outlook</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Technology & Software</strong></td><td>38%</td><td>46.8%</td><td style="color:#6b7280;font-size:11px">Highest share by end-use industry</td></tr>
+          <tr><td><strong>BFSI</strong></td><td>19%</td><td>44.2%</td><td style="color:#6b7280;font-size:11px">Largest traditional vertical — fraud, compliance, advisory</td></tr>
+          <tr><td><strong>Healthcare</strong></td><td>12%</td><td>48.4%</td><td style="color:#6b7280;font-size:11px">Fastest growing vertical</td></tr>
+          <tr><td><strong>Manufacturing</strong></td><td>10%</td><td>45.1%</td><td style="color:#6b7280;font-size:11px">Asia Pacific driving growth</td></tr>
+          <tr><td><strong>Retail & CPG</strong></td><td>8%</td><td>44.6%</td><td style="color:#6b7280;font-size:11px">Customer experience automation leading</td></tr>
+          <tr><td><strong>Energy & Utilities</strong></td><td>5%</td><td>52.0%</td><td style="color:#6b7280;font-size:11px">Middle East fastest — Vision 2030</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CSV COLUMNS -->
+  <div id="tab-export" class="section">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Choose exactly which columns appear in your Tableau CSV. All active filters from the Market Data tab apply to the export.</p>
+    <div class="col-check-grid" id="col-grid"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="exportCSV()">&#8595; Export selected columns</button>
+      <button class="btn" onclick="selectAllCols()">Select all</button>
+      <button class="btn" onclick="clearAllCols()">Clear all</button>
+    </div>
+    <div class="info-box">
+      <strong>How to connect to Tableau Cloud:</strong><br>
+      1. Click Export — CSV downloads to your machine<br>
+      2. Tableau Cloud → New Workbook → Connect to Data → <strong>Text File</strong><br>
+      3. Upload the CSV — columns are auto-detected<br>
+      4. Blend with your internal SQL data on <strong>Vertical</strong> and <strong>Region</strong> as join keys<br>
+      5. Use <strong>Market Size ($B)</strong> and <strong>CAGR (%)</strong> as external benchmarks vs your internal revenue growth<br>
+      6. Layer your <strong>Opportunity Score</strong> and <strong>Win Rate</strong> model outputs on top for the priority matrix
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW=[
+  {vertical:"BFSI",capability:"Fraud Detection & Compliance",serviceLine:"Risk & Compliance Automation",region:"North America",year:2024,marketSizeUSD_B:1.10,cagr_pct:44.2,adoptionLevel:"High",topCompetitors:["Accenture","Wipro","IBM"],genpactPresence:"Strong",source:"Mordor Intelligence 2025"},
+  {vertical:"BFSI",capability:"Fraud Detection & Compliance",serviceLine:"Risk & Compliance Automation",region:"Europe",year:2024,marketSizeUSD_B:0.72,cagr_pct:41.0,adoptionLevel:"High",topCompetitors:["Capgemini","Wipro"],genpactPresence:"Growing",source:"Mordor Intelligence 2025"},
+  {vertical:"BFSI",capability:"Intelligent Virtual Assistants",serviceLine:"Customer Experience Automation",region:"North America",year:2024,marketSizeUSD_B:0.85,cagr_pct:44.2,adoptionLevel:"High",topCompetitors:["Accenture","Cognizant"],genpactPresence:"Strong",source:"Mordor Intelligence 2025"},
+  {vertical:"BFSI",capability:"Autonomous Process Automation",serviceLine:"Finance & Accounting Automation",region:"Asia Pacific",year:2024,marketSizeUSD_B:0.60,cagr_pct:46.0,adoptionLevel:"Medium",topCompetitors:["TCS","Infosys"],genpactPresence:"Emerging",source:"Straits Research 2025"},
+  {vertical:"BFSI",capability:"Fraud Detection & Compliance",serviceLine:"Risk & Compliance Automation",region:"Middle East",year:2024,marketSizeUSD_B:0.18,cagr_pct:48.0,adoptionLevel:"Low",topCompetitors:["Accenture"],genpactPresence:"Weak",source:"Straits Research 2025"},
+  {vertical:"Healthcare",capability:"Autonomous Process Automation",serviceLine:"Healthcare Operations Automation",region:"North America",year:2024,marketSizeUSD_B:0.62,cagr_pct:48.4,adoptionLevel:"High",topCompetitors:["Cognizant","Optum"],genpactPresence:"Growing",source:"Fortune Business Insights 2025"},
+  {vertical:"Healthcare",capability:"Intelligent Virtual Assistants",serviceLine:"Customer Experience Automation",region:"North America",year:2024,marketSizeUSD_B:0.44,cagr_pct:48.4,adoptionLevel:"High",topCompetitors:["Cognizant","IBM"],genpactPresence:"Growing",source:"Fortune Business Insights 2025"},
+  {vertical:"Healthcare",capability:"Autonomous Process Automation",serviceLine:"Healthcare Operations Automation",region:"Europe",year:2024,marketSizeUSD_B:0.38,cagr_pct:45.0,adoptionLevel:"Medium",topCompetitors:["Capgemini","Atos"],genpactPresence:"Emerging",source:"Fortune Business Insights 2025"},
+  {vertical:"Healthcare",capability:"Fraud Detection & Compliance",serviceLine:"Risk & Compliance Automation",region:"Asia Pacific",year:2024,marketSizeUSD_B:0.22,cagr_pct:50.0,adoptionLevel:"Low",topCompetitors:["Infosys","TCS"],genpactPresence:"Weak",source:"Straits Research 2025"},
+  {vertical:"Manufacturing",capability:"Autonomous Process Automation",serviceLine:"Supply Chain & Ops Automation",region:"North America",year:2024,marketSizeUSD_B:0.48,cagr_pct:43.0,adoptionLevel:"Medium",topCompetitors:["IBM","Siemens Digital"],genpactPresence:"Growing",source:"Grand View Research 2025"},
+  {vertical:"Manufacturing",capability:"Autonomous Process Automation",serviceLine:"Supply Chain & Ops Automation",region:"Europe",year:2024,marketSizeUSD_B:0.55,cagr_pct:41.0,adoptionLevel:"Medium",topCompetitors:["Siemens Digital","Capgemini"],genpactPresence:"Weak",source:"Grand View Research 2025"},
+  {vertical:"Manufacturing",capability:"Autonomous Process Automation",serviceLine:"Supply Chain & Ops Automation",region:"Asia Pacific",year:2024,marketSizeUSD_B:0.70,cagr_pct:45.1,adoptionLevel:"Medium",topCompetitors:["Infosys","TCS"],genpactPresence:"Emerging",source:"Mordor Intelligence 2025"},
+  {vertical:"Retail & CPG",capability:"Intelligent Virtual Assistants",serviceLine:"Customer Experience Automation",region:"North America",year:2024,marketSizeUSD_B:0.40,cagr_pct:44.6,adoptionLevel:"High",topCompetitors:["Salesforce SI","Accenture"],genpactPresence:"Emerging",source:"MarketsandMarkets 2025"},
+  {vertical:"Retail & CPG",capability:"Autonomous Process Automation",serviceLine:"Supply Chain & Ops Automation",region:"Asia Pacific",year:2024,marketSizeUSD_B:0.50,cagr_pct:46.0,adoptionLevel:"Medium",topCompetitors:["Infosys","Wipro"],genpactPresence:"Weak",source:"MarketsandMarkets 2025"},
+  {vertical:"Retail & CPG",capability:"Intelligent Virtual Assistants",serviceLine:"Customer Experience Automation",region:"Europe",year:2024,marketSizeUSD_B:0.28,cagr_pct:40.0,adoptionLevel:"Medium",topCompetitors:["Capgemini"],genpactPresence:"Weak",source:"MarketsandMarkets 2025"},
+  {vertical:"Technology",capability:"Multi-Agent Systems",serviceLine:"AI-Powered Software Development",region:"North America",year:2024,marketSizeUSD_B:0.98,cagr_pct:46.8,adoptionLevel:"High",topCompetitors:["Accenture","Cognizant"],genpactPresence:"Emerging",source:"Mordor Intelligence 2025"},
+  {vertical:"Technology",capability:"Multi-Agent Systems",serviceLine:"AI-Powered Software Development",region:"Europe",year:2024,marketSizeUSD_B:0.55,cagr_pct:44.0,adoptionLevel:"High",topCompetitors:["Atos","Capgemini"],genpactPresence:"Weak",source:"Mordor Intelligence 2025"},
+  {vertical:"Technology",capability:"Multi-Agent Systems",serviceLine:"AI-Powered Software Development",region:"Asia Pacific",year:2024,marketSizeUSD_B:0.42,cagr_pct:48.0,adoptionLevel:"Medium",topCompetitors:["TCS","Infosys"],genpactPresence:"Weak",source:"Mordor Intelligence 2025"},
+  {vertical:"Energy & Utilities",capability:"Autonomous Process Automation",serviceLine:"Operations & Asset Automation",region:"Middle East",year:2024,marketSizeUSD_B:0.20,cagr_pct:52.0,adoptionLevel:"Low",topCompetitors:["Accenture","IBM"],genpactPresence:"Weak",source:"Straits Research 2025"},
+  {vertical:"Energy & Utilities",capability:"Autonomous Process Automation",serviceLine:"Operations & Asset Automation",region:"North America",year:2024,marketSizeUSD_B:0.32,cagr_pct:43.0,adoptionLevel:"Medium",topCompetitors:["IBM","Cognizant"],genpactPresence:"Emerging",source:"Straits Research 2025"},
+  {vertical:"Energy & Utilities",capability:"Autonomous Process Automation",serviceLine:"Operations & Asset Automation",region:"Europe",year:2024,marketSizeUSD_B:0.28,cagr_pct:40.0,adoptionLevel:"Low",topCompetitors:["Capgemini","Siemens Digital"],genpactPresence:"Weak",source:"Straits Research 2025"},
+];
+
+const COLS=[
+  {key:"vertical",label:"Vertical",default:true},
+  {key:"capability",label:"Capability",default:true},
+  {key:"serviceLine",label:"Service Line",default:true},
+  {key:"region",label:"Region",default:true},
+  {key:"year",label:"Year",default:true},
+  {key:"marketSizeUSD_B",label:"Market Size ($B)",default:true},
+  {key:"cagr_pct",label:"CAGR (%)",default:true},
+  {key:"adoptionLevel",label:"Adoption Level",default:true},
+  {key:"topCompetitors",label:"Top Competitors",default:true},
+  {key:"genpactPresence",label:"Genpact Presence",default:true},
+  {key:"source",label:"Data Source",default:false},
+];
+
+let filtered=[...RAW];
+let charts={};
+
+function buildColGrid(){
+  const g=document.getElementById("col-grid");
+  g.innerHTML=COLS.map(c=>`<label class="col-check"><input type="checkbox" id="col-${c.key}" ${c.default?"checked":""}> ${c.label}</label>`).join("");
+}
+
+function selectAllCols(){COLS.forEach(c=>{const el=document.getElementById("col-"+c.key);if(el)el.checked=true;})}
+function clearAllCols(){COLS.forEach(c=>{const el=document.getElementById("col-"+c.key);if(el)el.checked=false;})}
+
+function applyFilters(){
+  const v=document.getElementById("f-v").value;
+  const c=document.getElementById("f-c").value;
+  const s=document.getElementById("f-s").value;
+  const r=document.getElementById("f-r").value;
+  const a=document.getElementById("f-a").value;
+  const p=document.getElementById("f-p").value;
+  filtered=RAW.filter(d=>
+    (!v||d.vertical===v)&&(!c||d.capability.includes(c))&&
+    (!s||d.serviceLine.includes(s))&&(!r||d.region===r)&&
+    (!a||d.adoptionLevel===a)&&(!p||d.genpactPresence===p)
+  );
+  renderAll();
+}
+
+function renderMetrics(){
+  const total=filtered.reduce((s,r)=>s+r.marketSizeUSD_B,0);
+  const avgC=filtered.length?filtered.reduce((s,r)=>s+r.cagr_pct,0)/filtered.length:0;
+  const verts=new Set(filtered.map(d=>d.vertical)).size;
+  const regions=new Set(filtered.map(d=>d.region)).size;
+  document.getElementById("metrics-row").innerHTML=`
+    <div class="mc"><div class="lbl">Total market size</div><div class="val">$${total.toFixed(2)}B</div><div class="sub">in current selection</div></div>
+    <div class="mc"><div class="lbl">Avg CAGR</div><div class="val">${avgC.toFixed(1)}%</div><div class="sub">growth rate</div></div>
+    <div class="mc"><div class="lbl">Verticals</div><div class="val">${verts}</div><div class="sub">industry segments</div></div>
+    <div class="mc"><div class="lbl">Regions</div><div class="val">${regions}</div><div class="sub">geographic markets</div></div>
+    <div class="mc"><div class="lbl">Data points</div><div class="val">${filtered.length}</div><div class="sub">of ${RAW.length} total records</div></div>
+  `;
+}
+
+function renderTable(){
+  const b=document.getElementById("tbl-body");
+  if(!filtered.length){b.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:2rem;color:#9ca3af">No records match your filters</td></tr>`;return;}
+  b.innerHTML=filtered.map(r=>`<tr>
+    <td><strong>${r.vertical}</strong></td>
+    <td style="font-size:11px;color:#374151">${r.capability}</td>
+    <td style="font-size:11px;color:#374151">${r.serviceLine}</td>
+    <td>${r.region}</td>
+    <td><strong>$${r.marketSizeUSD_B.toFixed(2)}B</strong></td>
+    <td style="color:#16a34a;font-weight:600">${r.cagr_pct.toFixed(1)}%</td>
+    <td><span class="badge ${r.adoptionLevel==='High'?'b-high':r.adoptionLevel==='Medium'?'b-med':'b-low'}">${r.adoptionLevel}</span></td>
+    <td style="font-size:11px">${r.topCompetitors.slice(0,2).join(', ')}</td>
+    <td><span class="badge ${r.genpactPresence==='Strong'?'b-strong':r.genpactPresence==='Growing'?'b-growing':r.genpactPresence==='Emerging'?'b-emerging':'b-weak'}">${r.genpactPresence}</span></td>
+  </tr>`).join("");
+  document.getElementById("row-count").textContent=`Showing ${filtered.length} of ${RAW.length} records`;
+}
+
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function renderCharts(){
+  dc("chart-vertical");dc("chart-region");dc("chart-presence");
+  const vMap={};
+  filtered.forEach(d=>{vMap[d.vertical]=(vMap[d.vertical]||0)+d.marketSizeUSD_B;});
+  const vL=Object.keys(vMap),vD=vL.map(k=>+vMap[k].toFixed(2));
+  const clrs=["#2563eb","#16a34a","#d97706","#db2777","#7c3aed","#ea580c"];
+  charts["chart-vertical"]=new Chart(document.getElementById("chart-vertical"),{type:"bar",data:{labels:vL,datasets:[{label:"Market ($B)",data:vD,backgroundColor:clrs,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>"$"+v+"B"},grid:{color:"#f3f4f6"}},x:{grid:{display:false}}}}});
+
+  const rMap={},rCnt={};
+  filtered.forEach(d=>{rMap[d.region]=(rMap[d.region]||0)+d.cagr_pct;rCnt[d.region]=(rCnt[d.region]||0)+1;});
+  const rL=Object.keys(rMap),rD=rL.map(k=>+(rMap[k]/rCnt[k]).toFixed(1));
+  charts["chart-region"]=new Chart(document.getElementById("chart-region"),{type:"bar",data:{labels:rL,datasets:[{label:"Avg CAGR (%)",data:rD,backgroundColor:"#16a34a",borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+"%"},grid:{color:"#f3f4f6"}},x:{grid:{display:false}}}}});
+
+  const pMap={Strong:3,Growing:2,Emerging:1,Weak:0},aMap={High:3,Medium:2,Low:1};
+  const bData=filtered.map((d,i)=>({x:aMap[d.adoptionLevel]||1,y:pMap[d.genpactPresence]||0,r:Math.max(7,d.marketSizeUSD_B*20),label:d.vertical+" / "+d.region}));
+  charts["chart-presence"]=new Chart(document.getElementById("chart-presence"),{type:"bubble",data:{datasets:[{label:"Market opportunity",data:bData,backgroundColor:"rgba(37,99,235,0.4)",borderColor:"#2563eb",borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=ctx.raw;return d.label+" — $"+filtered[ctx.dataIndex].marketSizeUSD_B.toFixed(2)+"B";}}}},scales:{x:{min:0,max:4,ticks:{callback:v=>["","Low","Medium","High",""][v]||""},title:{display:true,text:"Market adoption level",font:{size:11}},grid:{color:"#f3f4f6"}},y:{min:-1,max:4,ticks:{callback:v=>["","Weak","Emerging","Growing","Strong",""][v+1]||""},title:{display:true,text:"Genpact presence",font:{size:11}},grid:{color:"#f3f4f6"}}}}}); 
+}
+
+function renderMacroCharts(){
+  dc("chart-macro-region");dc("chart-macro-vertical");
+  charts["chart-macro-region"]=new Chart(document.getElementById("chart-macro-region"),{type:"doughnut",data:{labels:["North America","Europe","Asia Pacific","Middle East","Rest of World"],datasets:[{data:[40,25,22,7,6],backgroundColor:["#2563eb","#7c3aed","#16a34a","#d97706","#6b7280"],borderWidth:2,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:12}}}}});
+  charts["chart-macro-vertical"]=new Chart(document.getElementById("chart-macro-vertical"),{type:"doughnut",data:{labels:["Technology","BFSI","Healthcare","Manufacturing","Retail & CPG","Energy"],datasets:[{data:[38,19,12,10,8,5],backgroundColor:["#2563eb","#16a34a","#d97706","#7c3aed","#db2777","#ea580c"],borderWidth:2,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:12}}}}});
+}
+
+function exportCSV(){
+  const selCols=COLS.filter(c=>{const el=document.getElementById("col-"+c.key);return el?el.checked:c.default;});
+  const headers=selCols.map(c=>c.label);
+  const rows=filtered.map(r=>selCols.map(c=>{const v=r[c.key];return Array.isArray(v)?v.join("|"):v;}));
+  const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="genpact_agentic_ai_market_intelligence.csv";a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(name,el){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("tab-"+name).classList.add("active");
+  if(name==="macro")setTimeout(renderMacroCharts,50);
+}
+
+buildColGrid();
+renderAll();
+function renderAll(){renderMetrics();renderTable();renderCharts();}
+</script>
+</body>
+</html>
